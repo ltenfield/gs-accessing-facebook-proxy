@@ -17,6 +17,8 @@ public class FacebookServiceProvider extends AbstractOAuth2ServiceProvider<Faceb
 	
 	private HttpClient httpClient;
 	
+	private HttpComponentsClientHttpRequestFactory requestFactory;
+	
 	private String appNamespace;
 	
 	private static final String API_VERSION = "2.5";
@@ -36,9 +38,10 @@ public class FacebookServiceProvider extends AbstractOAuth2ServiceProvider<Faceb
 	}
 	
 	public FacebookServiceProvider(String appId, String appSecret, String appNamespace, HttpClient httpClient) {
-		super(getOAuth2Template(appId, appSecret, httpClient));		
+		super(getOAuth2Template(appId, appSecret, httpClient));
 		this.appNamespace = appNamespace;
 		this.httpClient = httpClient;
+		this.requestFactory = new HttpComponentsClientHttpRequestFactory(this.httpClient);
 	}
 
 	private static OAuth2Template getOAuth2Template(String appId, String appSecret, HttpClient httpClient) {
@@ -54,7 +57,9 @@ public class FacebookServiceProvider extends AbstractOAuth2ServiceProvider<Faceb
 	}
 	
 	public Facebook getApi(String accessToken) {
-		return new FacebookTemplate(accessToken, appNamespace);
+		FacebookTemplate facebookTemplate = new FacebookTemplate(accessToken, appNamespace);
+		facebookTemplate.setRequestFactory(requestFactory);
+		return facebookTemplate;
 	}
 	
 }
